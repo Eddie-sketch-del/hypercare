@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HyperCare Ghana</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+body { background: #f0f2f5; }
+
+/* LOGIN */
+.login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
+.login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
+.login-logo { width: 50px; height: 50px; background: #0F6E56; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.login-logo span { color: white; font-size: 24px; font-weight: bold; }
+.login-title { font-size: 22px; font-weight: bold; color: #1a1a1a; margin-bottom: 5px; }
+.login-sub { font-size: 13px; color: #888; margin-bottom: 25px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { font-size: 13px; color: #555; display: block; margin-bottom: 5px; }
+.form-group input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+.form-group input:focus { border-color: #0F6E56; }
+.btn-primary { width: 100%; padding: 11px; background: #0F6E56; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+.btn-primary:hover { background: #085041; }
+.error-msg { color: red; font-size: 12px; margin-top: 8px; display: none; }
+
+/* MAIN APP */
+.main-app { display: none; }
+.topbar { background: #0F6E56; color: white; padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.topbar-title { font-size: 16px; font-weight: bold; }
+.topbar-right { display: flex; align-items: center; gap: 15px; font-size: 13px; }
+.btn-logout { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.btn-logout:hover { background: rgba(255,255,255,0.3); }
+
+/* TABS */
+.tabs { background: white; border-bottom: 1px solid #eee; display: flex; padding: 0 20px; }
+.tab { padding: 14px 18px; font-size: 13px; color: #888; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { color: #0F6E56; border-bottom-color: #0F6E56; font-weight: bold; }
+
+/* CONTENT */
+.content { padding: 20px; max-width: 1100px; margin: 0 auto; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* STATS */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.stat-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 5px rgba(0,0,0,0.06); }
+.stat-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: bold; color: #1a1a1a; }
+.stat-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+/* CARDS */
+.card { background: white; border-radius: 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+.card-header { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 14px; font-weight: bold; color: #1a1a1a; }
+.btn-add { background: #0F6E56; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.btn-add:hover { background: #085041; }
+
+/* TABLE */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 12px 20px; font-size: 11px; color: #888; border-bottom: 1px solid #f0f0f0; text-transform: uppercase; }
+td { padding: 14px 20px; border-bottom: 1px solid #f5f5f5; color: #333; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafa; }
+
+/* BADGES */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+.badge-success { background: #e8f5e9; color: #2e7d32; }
+.badge-danger { background: #ffebee; color: #c62828; }
+.badge-warn { background: #fff8e1; color: #f57f17; }
+
+/* MODAL */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+.modal-bg.open { display: flex; }
+.modal { background: white; border-radius: 12px; width: 100%; max-width: 440px; overflow: hidden; }
+.modal-header { padding: 18px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+.modal-title { font-size: 15px; font-weight: bold; }
+.btn-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
+.modal-body { padding: 20px; }
+.modal-footer { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; justify-content: flex-end; }
+.btn-cancel { background: none; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.btn-save { background: #0F6E56; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; }
+.field { margin-bottom: 15px; }
+.field label { font-size: 12px; color: #555; display: block; margin-bottom: 5px; }
+.field input { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; outline: none; }
+.field input:focus { border-color: #0F6E56; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* NOTIF */
+.notif-item { padding: 14px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #f5f5f5; }
+.notif-item:last-child { border-bottom: none; }
+.notif-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.notif-icon.missed { background: #ffebee; color: #c62828; }
+.notif-icon.answered { background: #e8f5e9; color: #2e7d32; }
+.notif-name { font-size: 13px; font-weight: bold; color: #1a1a1a; }
+.notif-detail { font-size: 12px; color: #888; margin-top: 2px; }
+.notif-time { font-size: 11px; color: #aaa; margin-left: auto; white-space: nowrap; }
+
+/* SCHEDULE */
+.schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+.schedule-item { background: #f8fffe; border: 1px solid #e0f0eb; border-radius: 10px; padding: 15px; }
+.schedule-type { font-size: 12px; color: #0F6E56; margin-bottom: 5px; font-weight: bold; }
+.schedule-time { font-size: 22px; font-weight: bold; color: #1a1a1a; }
+.schedule-days { font-size: 11px; color: #888; margin-top: 4px; }
+
+/* TEST CALL */
+.test-section { padding: 20px; }
+.btn-test { background: #0F6E56; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-right: 10px; }
+.btn-test:hover { background: #085041; }
+.btn-test-life { background: #185FA5; }
+.btn-test-life:hover { background: #0d4278; }
+.test-result { margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; }
+.test-result.success { background: #e8f5e9; color: #2e7d32; }
+.test-result.error { background: #ffebee; color: #c62828; }
+
+.empty { text-align: center; padding: 40px; color: #aaa; font-size: 13px; }
+.btn-delete { background: none; border: 1px solid #ffcdd2; color: #c62828; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+.btn-delete:hover { background: #ffebee; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <div class="login-logo"><span>H</span></div>
+    <div class="login-title">HyperCare Ghana</div>
+    <div class="login-sub">Hypertension Patient Voice Reminder System</div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="login-username" placeholder="Enter your username" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter') doLogin()" />
+    </div>
+    <div class="error-msg" id="login-error">Incorrect username or password.</div>
+    <button class="btn-primary" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="main-app" id="main-app">
+  <div class="topbar">
+    <div class="topbar-title">🏥 HyperCare Ghana</div>
+    <div class="topbar-right">
+      <span id="nurse-name"></span>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+    <button class="tab" onclick="showTab('patients', this)">👥 Patients</button>
+    <button class="tab" onclick="showTab('notifications', this)">🔔 Notifications</button>
+    <button class="tab" onclick="showTab('schedule', this)">🕐 Schedule</button>
+    <button class="tab" onclick="showTab('test', this)">📞 Test Call</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">👥 Total Patients</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-sub">Enrolled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">✅ Calls Answered</div>
+          <div class="stat-value" style="color:#2e7d32;" id="stat-answered">0</div>
+          <div class="stat-sub">Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">❌ Calls Missed</div>
+          <div class="stat-value" style="color:#c62828;" id="stat-missed">0</div>
+          <div class="stat-sub">Need follow-up</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">📋 Recent Call Activity</div></div>
+        <div id="dashboard-calls"><div class="empty">No calls yet today</div></div>
+      </div>
+    </div>
+
+    <!-- PATIENTS -->
+    <div class="tab-content" id="tab-patients">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👥 Patient List</div>
+          <button class="btn-add" onclick="document.getElementById('modal-add').classList.add('open')">+ Add Patient</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Phone Number</th>
+                <th>Systolic (mmHg)</th>
+                <th>Diastolic (mmHg)</th>
+                <th>BP Status</th>
+                <th>Date Added</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="patient-tbody">
+              <tr><td colspan="7"><div class="empty">No patients added yet</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="tab-content" id="tab-notifications">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔔 All Call Notifications</div></div>
+        <div id="notif-list"><div class="empty">No notifications yet</div></div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="tab-content" id="tab-schedule">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🕐 Current Call Schedule</div></div>
+        <div class="schedule-grid">
+          <div class="schedule-item">
+            <div class="schedule-type">💊 Medication Reminder</div>
+            <div class="schedule-time" id="med-time-display">8:00 AM</div>
+            <div class="schedule-days" id="med-days-display">Every day</div>
+            <div style="margin-top:8px;"><span class="badge badge-success">Active</span></div>
+          </div>
+          <div class="schedule-item">
+            <div class="schedule-type">🥦 Lifestyle Reminder</div>
+            <div class="schedule-time" id="life-time-display">6:00 PM</div>
+            <div class="schedule-days" id="life-days-display">Mon, Wed, Fri</div>
+            <div style="margin-top:8px;"><span class="badge badge-success">Active</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">🎙️ Voice Message Scripts (English)</div></div>
+        <div style="padding:20px; display:flex; flex-direction:column; gap:15px;">
+          <div style="background:#f8fffe;border:1px solid #e0f0eb;border-radius:8px;padding:15px;">
+            <div style="font-size:12px;color:#0F6E56;font-weight:bold;margin-bottom:6px;">💊 Medication Reminder</div>
+            <div style="font-size:13px;color:#333;font-style:italic;">"Good morning. This is a reminder to take your medication today. Please do not forget. Thank you and stay healthy."</div>
+          </div>
+          <div style="background:#f0f7ff;border:1px solid #d0e4f7;border-radius:8px;padding:15px;">
+            <div style="font-size:12px;color:#185FA5;font-weight:bold;margin-bottom:6px;">🥦 Lifestyle Reminder</div>
+            <div style="font-size:13px;color:#333;font-style:italic;">"Good morning. This is a reminder to eat healthy food, avoid alcohol, and exercise regularly today. Thank you and stay healthy."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEST CALL -->
+    <div class="tab-content" id="tab-test">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📞 Test Voice Call</div></div>
+        <div class="test-section">
+          <p style="font-size:13px;color:#555;margin-bottom:15px;">Click the buttons below to send a test call to all active patients immediately.</p>
+          <button class="btn-test" onclick="triggerCall('medication')">💊 Send Medication Reminder Now</button>
+          <button class="btn-test btn-test-life" onclick="triggerCall('lifestyle')">🥦 Send Lifestyle Reminder Now</button>
+          <div class="test-result" id="test-result"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD PATIENT MODAL -->
+<div class="modal-bg" id="modal-add">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Patient</div>
+      <button class="btn-close" onclick="document.getElementById('modal-add').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="p-name" placeholder="e.g. Kofi Mensah" />
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="text" id="p-phone" placeholder="e.g. 0244123456" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Systolic BP (mmHg)</label>
+          <input type="number" id="p-sys" placeholder="e.g. 140" />
+        </div>
+        <div class="field">
+          <label>Diastolic BP (mmHg)</label>
+          <input type="number" id="p-dia" placeholder="e.g. 90" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('modal-add').classList.remove('open')">Cancel</button>
+      <button class="btn-save" onclick="savePatient()">Add Patient</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+// =============================================
+// AUTH
+// =============================================
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  try {
+    const res = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('nurse-name').textContent = `👤 ${data.name}`;
+      document.getElementById('login-error').style.display = 'none';
+      loadDashboard();
+      loadPatients();
+      loadNotifications();
+      loadSchedule();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  } catch (e) {
+    document.getElementById('login-error').textContent = 'Cannot connect to server. Make sure app.py is running.';
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+// =============================================
+// TABS
+// =============================================
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// =============================================
+// DASHBOARD
+// =============================================
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API}/calls/stats`);
+    const data = await res.json();
+    document.getElementById('stat-total').textContent = data.total_patients;
+    document.getElementById('stat-answered').textContent = data.answered_today;
+    document.getElementById('stat-missed').textContent = data.missed_today;
+  } catch (e) {}
+
+  try {
+    const res = await fetch(`${API}/calls`);
+    const calls = await res.json();
+    const container = document.getElementById('dashboard-calls');
+    if (calls.length === 0) {
+      container.innerHTML = '<div class="empty">No calls yet today</div>';
+    } else {
+      container.innerHTML = calls.slice(0, 5).map(c => `
+        <div class="notif-item">
+          <div class="notif-icon ${c.status}">${c.status === 'answered' ? '✅' : '❌'}</div>
+          <div>
+            <div class="notif-name">${c.patient_name}</div>
+            <div class="notif-detail">${c.call_type} reminder — ${c.status}</div>
+          </div>
+          <div class="notif-time">${c.timestamp}</div>
+        </div>`).join('');
+    }
+  } catch (e) {}
+}
+
+// =============================================
+// PATIENTS
+// =============================================
+function bpStatus(sys, dia) {
+  if (sys >= 140 || dia >= 90) return { label: 'High', cls: 'badge-danger' };
+  if (sys >= 130 || dia >= 80) return { label: 'Elevated', cls: 'badge-warn' };
+  return { label: 'Normal', cls: 'badge-success' };
+}
+
+async function loadPatients() {
+  try {
+    const res = await fetch(`${API}/patients`);
+    const patients = await res.json();
+    const tbody = document.getElementById('patient-tbody');
+    if (patients.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty">No patients added yet. Click "Add Patient" to get started.</div></td></tr>';
+    } else {
+      tbody.innerHTML = patients.map(p => {
+        const s = bpStatus(p.systolic, p.diastolic);
+        return `<tr>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.phone}</td>
+          <td>${p.systolic}</td>
+          <td>${p.diastolic}</td>
+          <td><span class="badge ${s.cls}">${s.label}</span></td>
+          <td>${p.date_added}</td>
+          <td><button class="btn-delete" onclick="deletePatient(${p.id})">Remove</button></td>
+        </tr>`;
+      }).join('');
+    }
+  } catch (e) {}
+}
+
+async function savePatient() {
+  const name = document.getElementById('p-name').value.trim();
+  const phone = document.getElementById('p-phone').value.trim();
+  const systolic = parseInt(document.getElementById('p-sys').value);
+  const diastolic = parseInt(document.getElementById('p-dia').value);
+  if (!name || !phone || isNaN(systolic) || isNaN(diastolic)) {
+    alert('Please fill in all fields!');
+    return;
+  }
+  try {
+    const res = await fetch(`${API}/patients`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, systolic, diastolic })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('modal-add').classList.remove('open');
+      document.getElementById('p-name').value = '';
+      document.getElementById('p-phone').value = '';
+      document.getElementById('p-sys').value = '';
+      document.getElementById('p-dia').value = '';
+      loadPatients();
+      loadDashboard();
+    }
+  } catch (e) { alert('Error adding patient'); }
+}
+
+async function deletePatient(id) {
+  if (!confirm('Are you sure you want to remove this patient?')) return;
+  try {
+    await fetch(`${API}/patients/${id}`, { method: 'DELETE' });
+    loadPatients();
+    loadDashboard();
+  } catch (e) {}
+}
+
+// =============================================
+// NOTIFICATIONS
+// =============================================
+async function loadNotifications() {
+  try {
+    const res = await fetch(`${API}/calls`);
+    const calls = await res.json();
+    const container = document.getElementById('notif-list');
+    if (calls.length === 0) {
+      container.innerHTML = '<div class="empty">No notifications yet</div>';
+    } else {
+      container.innerHTML = calls.map(c => `
+        <div class="notif-item">
+          <div class="notif-icon ${c.status}">${c.status === 'answered' ? '✅' : '❌'}</div>
+          <div>
+            <div class="notif-name">${c.patient_name} — <span class="badge ${c.status === 'answered' ? 'badge-success' : 'badge-danger'}">${c.status}</span></div>
+            <div class="notif-detail">${c.call_type} reminder · ${c.phone}</div>
+          </div>
+          <div class="notif-time">${c.timestamp}</div>
+        </div>`).join('');
+    }
+  } catch (e) {}
+}
+
+// =============================================
+// SCHEDULE
+// =============================================
+async function loadSchedule() {
+  try {
+    const res = await fetch(`${API}/schedule`);
+    const s = await res.json();
+    function formatTime(t) {
+      const [h, m] = t.split(':');
+      const hour = parseInt(h);
+      return `${hour > 12 ? hour - 12 : hour}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+    }
+    document.getElementById('med-time-display').textContent = formatTime(s.med_time);
+    document.getElementById('med-days-display').textContent = s.med_days === 'Mon,Tue,Wed,Thu,Fri,Sat,Sun' ? 'Every day' : s.med_days;
+    document.getElementById('life-time-display').textContent = formatTime(s.life_time);
+    document.getElementById('life-days-display').textContent = s.life_days;
+  } catch (e) {}
+}
+
+// =============================================
+// TEST CALL
+// =============================================
+async function triggerCall(type) {
+  const result = document.getElementById('test-result');
+  result.style.display = 'block';
+  result.className = 'test-result';
+  result.textContent = `Sending ${type} calls to all patients... Please wait.`;
+  try {
+    const res = await fetch(`${API}/calls/trigger`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ call_type: type })
+    });
+    const data = await res.json();
+    if (data.success) {
+      result.className = 'test-result success';
+      result.textContent = `✅ ${data.message}`;
+      loadDashboard();
+      loadNotifications();
+    } else {
+      result.className = 'test-result error';
+      result.textContent = `❌ Error: ${data.message}`;
+    }
+  } catch (e) {
+    result.className = 'test-result error';
+    result.textContent = '❌ Could not connect to server. Make sure app.py is running.';
+  }
+}
+</script>
+</body>
+</html>
