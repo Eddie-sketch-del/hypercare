@@ -28,7 +28,7 @@ FROG_LIFE_AUDIO_URL = "https://res.cloudinary.com/dqnceqtxf/video/upload/v177987
 # =============================================
 # IMPORTANT: Update this with your current ngrok URL
 # =============================================
-CALLBACK_BASE_URL = "https://dismantle-transpire-pegboard.ngrok-free.dev"
+CALLBACK_BASE_URL = "https://hypercare-9o3q.onrender.com"
 
 # Store which audio to play for each call
 call_audio_map = {}
